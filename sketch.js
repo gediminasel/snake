@@ -74,13 +74,16 @@ function moveSnake(){
 	snakeY.push(snakeY[snakeY.length-1]+speedY);
 	if(snakeX[snakeX.length-1]<SQUARE_H && snakeY[snakeY.length-1] < SQUARE_V && snakeX[snakeX.length-1]>-1 && snakeY[snakeY.length-1] >-1){
 		colorRect(snakeX[snakeX.length-1], snakeY[snakeY.length-1], 2);
-		if(!(snakeX[0] == foodX && snakeY[0] == foodY)){
+		if(!(snakeX[snakeX.length-1] == foodX && snakeY[snakeY.length-1] == foodY)){
 			colorRect(snakeX[0], snakeY[0], 0);
 			snakeX.splice(0,1);
 			snakeY.splice(0,1);
-		}else
+		}else{
 			newFood();
+			colorRect(snakeX[snakeX.length-1], snakeY[snakeY.length-1], 2);
+		}
 	}else{
+		deleteSnake();
 		newSnake();
 		pause = true;
 	}
@@ -88,9 +91,9 @@ function moveSnake(){
 
 function deleteSnake(){
 	while(snakeX.length>0){
-			colorRect(snakeX[0], snakeY[0], 0);
-			snakeX.splice(0,1);
-			snakeY.splice(0,1);
+		colorRect(snakeX[0], snakeY[0], 0);
+		snakeX.splice(0,1);
+		snakeY.splice(0,1);
 	}
 }
 
