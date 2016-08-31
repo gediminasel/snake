@@ -87,7 +87,11 @@ function moveSnake(){
 }
 
 function deleteSnake(){
-	while(snakeX)
+	while(snakeX.length>0){
+			colorRect(snakeX[0], snakeY[0], 0);
+			snakeX.splice(0,1);
+			snakeY.splice(0,1);
+	}
 }
 
 function colorRect(x, y, mode) {
@@ -102,6 +106,7 @@ function colorRect(x, y, mode) {
 
 function keyPressed() {
 	if(!turn){
+		turn = true;
 		if (keyCode === LEFT_ARROW && speedX != 1) {
 			speedX = -1;
 			speedY = 0;
@@ -114,8 +119,9 @@ function keyPressed() {
 		} else if (keyCode === DOWN_ARROW && speedY != -1) {
 			speedX = 0;
 			speedY = 1;
+		}else{
+			turn = false;
 		}
-		turn = true;
 	}
 	if(key == ' '){
 		pause = !pause;
