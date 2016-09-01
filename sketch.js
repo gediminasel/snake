@@ -1,7 +1,7 @@
 const RECTANGLE = 25;
-const SCREEN_WIDTH=/*parseInt(prompt("SCREEN_WIDTH"));*/500;
-const SCREEN_HEIGHT=/*parseInt(prompt("SCREEN_HEIGHT"));*/500;
-const SPEEDFPS = /*parseInt(prompt("SPEED"));*/7;
+const SCREEN_WIDTH=/*parseInt(prompt("SCREEN_WIDTH"));500*/$(window).width();
+const SCREEN_HEIGHT=/*parseInt(prompt("SCREEN_HEIGHT"));500*/$(window).height()-20;
+const SPEEDFPS = parseInt(prompt("SPEED"));;
 const MARGIN_WIDTH = (SCREEN_WIDTH % RECTANGLE)/2 ;
 const MARGIN_HEIGHT = (SCREEN_HEIGHT % RECTANGLE)/2 ;
 const PLAY_SCREEN_WIDTH = SCREEN_WIDTH - SCREEN_WIDTH % RECTANGLE;
@@ -129,7 +129,24 @@ function newFood(){
 }
 
 function die(nr){
-	alert("Game over. Laimėjo " + (nr+1).toString());
+	scores = [snake.snakeX.length, snake1.snakeX.length];
+	scores[nr]--;
+	nr = (nr + 1) % 2;
+	scores[nr] = scores[nr] * 2;
+	console.log(scores);
+	if(scores[0]>scores[1]){
+		alert("Game over. Laimėjo mėlynas.");
+	}else if(scores[0]==scores[1]){
+		scores[(nr + 1)%2]++;
+		if(scores[0]>scores[1]){
+			alert("Game over. Laimėjo mėlynas.");
+		} else{
+			alert("Game over. Laimėjo geltonas.");
+		}
+	}
+	else{
+		alert("Game over. Laimėjo geltonas.");
+	}
 	newLayout();
 	snake.create();
 	snake1.create();
