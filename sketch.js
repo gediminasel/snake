@@ -144,12 +144,12 @@ function colorRect(x, y, mode) {
 	else if(mode==2)
 		fill(0,0,255);
 	else if(mode==3)
-		fill(0,100,255);
+		fill(0,150,255);
 	rect(MARGIN_WIDTH + (RECTANGLE * x), MARGIN_HEIGHT + (RECTANGLE * y), RECTANGLE, RECTANGLE);
 }
 
 function keyPressed() {
-	if(!turn){
+	if(!turn && !pause){
 		turn = true;
 		if (keyCode === LEFT_ARROW && speedX != 1) {
 			speedX = -1;
