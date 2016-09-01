@@ -1,7 +1,7 @@
 const RECTANGLE = 25;
-const SCREEN_WIDTH=parseInt(prompt("SCREEN_WIDTH"));
-const SCREEN_HEIGHT=parseInt(prompt("SCREEN_HEIGHT"));
-const SPEEDFPS = parseInt(prompt("SPEED"));
+const SCREEN_WIDTH=/*parseInt(prompt("SCREEN_WIDTH"));*/500;
+const SCREEN_HEIGHT=/*parseInt(prompt("SCREEN_HEIGHT"));*/500;
+const SPEEDFPS = /*parseInt(prompt("SPEED"));*/7;
 const MARGIN_WIDTH = (SCREEN_WIDTH % RECTANGLE)/2 ;
 const MARGIN_HEIGHT = (SCREEN_HEIGHT % RECTANGLE)/2 ;
 const PLAY_SCREEN_WIDTH = SCREEN_WIDTH - SCREEN_WIDTH % RECTANGLE;
@@ -12,18 +12,87 @@ const SQUARE_V = parseInt( SCREEN_HEIGHT / RECTANGLE );
 var pause;
 var foodX;
 var foodY;
-var snakeX;
-var snakeY;
-var speedX;
-var speedY;
-var turn = false;
+
+var snake={
+snakeX : [],
+snakeY : [],
+speedX : 0,
+speedY : 0,
+turn : false,
+nr : 0,
+create : function(){
+	pause = true;
+	this.snakeX = [];
+	this.snakeY = [];
+	this.snakeX.push(math.randomInt(1,SQUARE_H-1));
+	this.snakeY.push(math.randomInt(1,SQUARE_V-1));
+	if(math.randomInt(0,2)==0){
+		this.speedX = math.randomInt(0,2)*2-1;
+		this.speedY = 0;
+	}else{
+		this.speedX = 0;
+		this.speedY=math.randomInt(0,2)*2-1;
+	}
+	colorRect(this.snakeX[0], this.snakeY[0], 2 + this.nr);
+},
+
+
+score : function(){
+	stroke(255,0,0);
+	fill(255,0,0);
+	rect(10+50*this.nr, SCREEN_HEIGHT, 20, 20);
+	fill(0,255,0);
+	text(this.snakeX.length, 10+50*this.nr, SCREEN_HEIGHT + 1, 20, 20 );
+	stroke(0,0,0);
+},
+move : function(){
+	this.snakeX.push(this.snakeX[this.snakeX.length-1]+this.speedX);
+	this.snakeY.push(this.snakeY[this.snakeY.length-1]+this.speedY);
+	if(this.snakeX[this.snakeX.length-1]<SQUARE_H && this.snakeY[this.snakeY.length-1] < SQUARE_V && this.snakeX[this.snakeX.length-1]>-1 && this.snakeY[this.snakeY.length-1] >-1){
+		colorRect(this.snakeX[this.snakeX.length-1], this.snakeY[this.snakeY.length-1], 2 + this.nr);
+		if((this.snakeX[this.snakeX.length-1] == foodX && this.snakeY[this.snakeY.length-1] == foodY)){
+			this.score();
+			newFood();
+			colorRect(this.snakeX[this.snakeX.length-1], this.snakeY[this.snakeY.length-1], 4);
+		}else if(isOnSnake(this.snakeX[this.snakeX.length-1],this.snakeY[this.snakeY.length-1], false, this.nr)){
+			die(this.nr);
+		}else{
+			colorRect(this.snakeX[0], this.snakeY[0], 0);
+			this.snakeX.splice(0,1);
+			this.snakeY.splice(0,1);
+		}
+	}else{
+		die(this.nr);
+	}
+}
+};
+var snake1= jQuery.extend({}, snake);
+snake1.nr = 1;
 
 function setup() {
     createCanvas(SCREEN_WIDTH, SCREEN_HEIGHT + 20);
 	frameRate(SPEEDFPS);
 	newLayout();
-	newSnake();
-	score();
+	snake.create();
+	snake1.create();
+	snake.score();
+	snake1.score();
+	newFood(true);
+}
+
+function isOnSnake(x,y,isFood, nr){
+	for(var i = 0;i<snake.snakeX.length-1 || (i<snake.snakeX.length && (isFood || nr == 1));i++){
+		if(snake.snakeX[i]==x && snake.snakeY[i]==y){
+			return true;
+		}
+	}
+	
+	for(var i = 0;i<snake1.snakeX.length-1 || (i<snake1.snakeX.length && (isFood || nr == 0));i++){
+		if(snake1.snakeX[i]==x && snake1.snakeY[i]==y){
+			return true;
+		}
+	}
+	return false;
 }
 
 function newLayout(){
@@ -35,53 +104,23 @@ function newLayout(){
 	}
 }
 
-function newSnake(){
-	pause = true;
-	snakeX = [];
-	snakeY = [];
-	snakeX.push(math.randomInt(1,SQUARE_H-1));
-	snakeY.push(math.randomInt(1,SQUARE_V-1));
-	if(math.randomInt(0,2)==0){
-		speedX = math.randomInt(0,2)*2-1;
-		speedY = 0;
-	}else{
-		speedX = 0;
-		speedY=math.randomInt(0,2)*2-1;
-	}
-	colorRect(snakeX[0], snakeY[0], 2);
-	newFood(true);
-}
 
 function draw() {
 	if(pause==false){
 		/*console.log(speedX);
 		console.log(speedY);*/
-		moveSnake();
-		turn = false;
+		snake.move();
+		snake1.move();
+		snake.turn = false;
+		snake1.turn = false;
 		
 		
 	}
 }
 
-function isOnSnake(x,y,isFood){
-	for(var i = 0;i<snakeX.length-1 || (i<snakeX.length && isFood);i++){
-		if(snakeX[i]==x && snakeY[i]==y){
-			console.log(x);
-			console.log(y);
-			return true;
-		}
-	}
-	return false;
-}
-
-function newFood(isNew){
-	if(isNew){
-		foodX = snakeX[0]+speedX;
-		foodY = snakeY[0]+speedY;
-	}else{
-		foodX = math.randomInt(0,SQUARE_H);
-		foodY = math.randomInt(0,SQUARE_V);
-	}
+function newFood(){
+	foodX = math.randomInt(0,SQUARE_H);
+	foodY = math.randomInt(0,SQUARE_V);
 	if(isOnSnake(foodX,foodY, true)){
 		newFood();
 	}else{
@@ -89,50 +128,14 @@ function newFood(isNew){
 	}
 }
 
-function score(){
-	stroke(255,0,0);
-	fill(255,0,0);
-	rect(10, SCREEN_HEIGHT, 20, 20);
-	fill(0,255,0);
-	text(snakeX.length, 10, SCREEN_HEIGHT + 1, 20, 20 );
-	stroke(0,0,0);
-}
-
-function moveSnake(){
-	snakeX.push(snakeX[snakeX.length-1]+speedX);
-	snakeY.push(snakeY[snakeY.length-1]+speedY);
-	if(snakeX[snakeX.length-1]<SQUARE_H && snakeY[snakeY.length-1] < SQUARE_V && snakeX[snakeX.length-1]>-1 && snakeY[snakeY.length-1] >-1){
-		colorRect(snakeX[snakeX.length-1], snakeY[snakeY.length-1], 2);
-		if((snakeX[snakeX.length-1] == foodX && snakeY[snakeY.length-1] == foodY)){
-			score();
-			newFood();
-			colorRect(snakeX[snakeX.length-1], snakeY[snakeY.length-1], 3);
-		}else if(isOnSnake(snakeX[snakeX.length-1],snakeY[snakeY.length-1], false)){
-			die();
-		}else{
-			colorRect(snakeX[0], snakeY[0], 0);
-			snakeX.splice(0,1);
-			snakeY.splice(0,1);
-		}
-	}else{
-		die();
-	}
-}
-
-function die(){
-	alert(snakeX.length-1);
+function die(nr){
+	alert("Game over. Laimėjo " + (nr+1).toString());
 	newLayout();
-	newSnake();
-	turn = true;
-	score();
-}
-
-function deleteSnake(){
-	while(snakeX.length>0){
-		colorRect(snakeX[0], snakeY[0], 0);
-		snakeX.splice(0,1);
-		snakeY.splice(0,1);
-	}
+	snake.create();
+	snake1.create();
+	snake.score();
+	snake1.score();
+	newFood(true);
 }
 
 function colorRect(x, y, mode) {
@@ -144,27 +147,52 @@ function colorRect(x, y, mode) {
 	else if(mode==2)
 		fill(0,0,255);
 	else if(mode==3)
+		fill(255,255,0);
+	else if(mode==4)
 		fill(0,150,255);
 	rect(MARGIN_WIDTH + (RECTANGLE * x), MARGIN_HEIGHT + (RECTANGLE * y), RECTANGLE, RECTANGLE);
 }
 
 function keyPressed() {
-	if(!turn && !pause){
-		turn = true;
-		if (keyCode === LEFT_ARROW && speedX != 1) {
-			speedX = -1;
-			speedY = 0;
-		} else if (keyCode === RIGHT_ARROW && speedX != -1) {
-			speedX = 1;
-			speedY = 0;
-		} else if (keyCode === UP_ARROW && speedY != 1) {
-			speedX = 0;
-			speedY = -1;
-		} else if (keyCode === DOWN_ARROW && speedY != -1) {
-			speedX = 0;
-			speedY = 1;
+	var cSnake=snake;
+	if(!cSnake.turn && !pause){
+		cSnake.turn = true;
+		if (keyCode === LEFT_ARROW && cSnake.speedX != 1) {
+			cSnake.speedX = -1;
+			cSnake.speedY = 0;
+		} else if (keyCode === RIGHT_ARROW && cSnake.speedX != -1) {
+			cSnake.speedX = 1;
+			cSnake.speedY = 0;
+		} else if (keyCode === UP_ARROW && cSnake.speedY != 1) {
+			cSnake.speedX = 0;
+			cSnake.speedY = -1;
+		} else if (keyCode === DOWN_ARROW && cSnake.speedY != -1) {
+			cSnake.speedX = 0;
+			cSnake.speedY = 1;
 		}else{
-			turn = false;
+			cSnake.turn = false;
+		}
+	}
+}
+
+function keyTyped(){
+	var cSnake=snake1;
+	if(!cSnake.turn && !pause){
+		cSnake.turn = true;
+		if (key == "a" && cSnake.speedX != 1) {
+			cSnake.speedX = -1;
+			cSnake.speedY = 0;
+		} else if (key == "d" && cSnake.speedX != -1) {
+			cSnake.speedX = 1;
+			cSnake.speedY = 0;
+		} else if (key == "w" && cSnake.speedY != 1) {
+			cSnake.speedX = 0;
+			cSnake.speedY = -1;
+		} else if (key == "s" && cSnake.speedY != -1) {
+			cSnake.speedX = 0;
+			cSnake.speedY = 1;
+		}else{
+			cSnake.turn = false;
 		}
 	}
 	if(key == ' '){
