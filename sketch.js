@@ -22,8 +22,7 @@ function setup() {
     createCanvas(SCREEN_WIDTH, SCREEN_HEIGHT + 20);
 	frameRate(SPEEDFPS);
 	newLayout();
-	newSnake();	
-	//newFood();
+	newSnake();
 	score();
 }
 
@@ -121,11 +120,11 @@ function moveSnake(){
 }
 
 function die(){
+	alert(snakeX.length-1);
 	newLayout();
-	//deleteSnake();
 	newSnake();
+	turn = true;
 	score();
-	//newFood();
 }
 
 function deleteSnake(){
