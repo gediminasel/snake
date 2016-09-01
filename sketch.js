@@ -27,8 +27,8 @@ function setup() {
 			colorRect(i,j,0);
 		}
 	}
-	newFood(false);
 	newSnake();	
+	newFood();
 }
 
 function newSnake(){
@@ -58,35 +58,51 @@ function draw() {
 	}
 }
 
-function newFood(isFirst){
-	if(!isFirst){
-		colorRect(foodX, foodY, 0);
+function isOnSnake(x,y,isFood){
+	for(var i = 0;i<snakeX.length-1 || (i<snakeX.length && isFood);i++){
+		if(snakeX[i]==x && snakeY[i]==y){
+			console.log(x);
+			console.log(y);
+			return true;
+		}
 	}
+	return false;
+}
+
+function newFood(){
 	foodX = math.randomInt(0,SQUARE_H);
 	foodY = math.randomInt(0,SQUARE_V);
-	
-	colorRect(foodX, foodY, 1);
+	if(isOnSnake(foodX,foodY, true)){
+		newFood();
+	}else{
+		colorRect(foodX, foodY, 1);
+	}
 }
 
 function moveSnake(){
-	colorRect(snakeX[0], snakeY[0], 0);
 	snakeX.push(snakeX[snakeX.length-1]+speedX);
 	snakeY.push(snakeY[snakeY.length-1]+speedY);
 	if(snakeX[snakeX.length-1]<SQUARE_H && snakeY[snakeY.length-1] < SQUARE_V && snakeX[snakeX.length-1]>-1 && snakeY[snakeY.length-1] >-1){
 		colorRect(snakeX[snakeX.length-1], snakeY[snakeY.length-1], 2);
-		if(!(snakeX[snakeX.length-1] == foodX && snakeY[snakeY.length-1] == foodY)){
+		if((snakeX[snakeX.length-1] == foodX && snakeY[snakeY.length-1] == foodY)){
+			newFood();
+			colorRect(snakeX[snakeX.length-1], snakeY[snakeY.length-1], 3);
+		}else if(isOnSnake(snakeX[snakeX.length-1],snakeY[snakeY.length-1], false)){
+			die();
+		}else{
 			colorRect(snakeX[0], snakeY[0], 0);
 			snakeX.splice(0,1);
 			snakeY.splice(0,1);
-		}else{
-			newFood();
-			colorRect(snakeX[snakeX.length-1], snakeY[snakeY.length-1], 2);
 		}
 	}else{
-		deleteSnake();
-		newSnake();
-		pause = true;
+		die();
 	}
+}
+
+function die(){
+	deleteSnake();
+	newSnake();
+	pause = true;
 }
 
 function deleteSnake(){
@@ -104,6 +120,8 @@ function colorRect(x, y, mode) {
 		fill(0,255,0);
 	else if(mode==2)
 		fill(0,0,255);
+	else if(mode==3)
+		fill(0,100,255);
 	rect(MARGIN_WIDTH + (RECTANGLE * x), MARGIN_HEIGHT + (RECTANGLE * y), RECTANGLE - 2, RECTANGLE - 2);
 }
 
