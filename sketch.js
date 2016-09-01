@@ -19,7 +19,7 @@ snakeY : [],
 speedX : 0,
 speedY : 0,
 turn : false,
-nr : 0,
+number : 0,
 create : function(){
 	pause = true;
 	this.snakeX = [];
@@ -33,41 +33,42 @@ create : function(){
 		this.speedX = 0;
 		this.speedY=math.randomInt(0,2)*2-1;
 	}
-	colorRect(this.snakeX[0], this.snakeY[0], 2 + this.nr);
+	colorRect(this.snakeX[0], this.snakeY[0], 2 + this.number);
 },
-
-
 score : function(){
 	stroke(255,0,0);
 	fill(255,0,0);
-	rect(10+50*this.nr, SCREEN_HEIGHT, 20, 20);
-	fill(0,255,0);
-	text(this.snakeX.length, 10+50*this.nr, SCREEN_HEIGHT + 1, 20, 20 );
+	rect(10+50*this.number, SCREEN_HEIGHT, 20, 20);
+	fill(255*this.number,255*this.number,255*((this.number+1)%2));
+	text(this.snakeX.length, 10+50*this.number, SCREEN_HEIGHT + 1, 20, 20 );
 	stroke(0,0,0);
 },
 move : function(){
+	colorRect(this.snakeX[0], this.snakeY[0], 0);
 	this.snakeX.push(this.snakeX[this.snakeX.length-1]+this.speedX);
 	this.snakeY.push(this.snakeY[this.snakeY.length-1]+this.speedY);
-	if(this.snakeX[this.snakeX.length-1]<SQUARE_H && this.snakeY[this.snakeY.length-1] < SQUARE_V && this.snakeX[this.snakeX.length-1]>-1 && this.snakeY[this.snakeY.length-1] >-1){
-		colorRect(this.snakeX[this.snakeX.length-1], this.snakeY[this.snakeY.length-1], 2 + this.nr);
+	if(this.snakeX[this.snakeX.length-1]<SQUARE_H &&
+			this.snakeY[this.snakeY.length-1] < SQUARE_V &&
+			this.snakeX[this.snakeX.length-1]>-1 &&
+			this.snakeY[this.snakeY.length-1] >-1){
+		colorRect(this.snakeX[this.snakeX.length-1], this.snakeY[this.snakeY.length-1], 2 + this.number);
 		if((this.snakeX[this.snakeX.length-1] == foodX && this.snakeY[this.snakeY.length-1] == foodY)){
 			this.score();
 			newFood();
 			colorRect(this.snakeX[this.snakeX.length-1], this.snakeY[this.snakeY.length-1], 4);
-		}else if(isOnSnake(this.snakeX[this.snakeX.length-1],this.snakeY[this.snakeY.length-1], false, this.nr)){
-			die(this.nr);
+		}else if(isOnSnake(this.snakeX[this.snakeX.length-1],this.snakeY[this.snakeY.length-1], false, this.number)){
+			die(this.number);
 		}else{
-			colorRect(this.snakeX[0], this.snakeY[0], 0);
 			this.snakeX.splice(0,1);
 			this.snakeY.splice(0,1);
 		}
 	}else{
-		die(this.nr);
+		die(this.number);
 	}
 }
 };
 var snake1= jQuery.extend({}, snake);
-snake1.nr = 1;
+snake1.number = 1;
 
 function setup() {
     createCanvas(SCREEN_WIDTH, SCREEN_HEIGHT + 20);
@@ -80,14 +81,14 @@ function setup() {
 	newFood(true);
 }
 
-function isOnSnake(x,y,isFood, nr){
-	for(var i = 0;i<snake.snakeX.length-1 || (i<snake.snakeX.length && (isFood || nr == 1));i++){
+function isOnSnake(x,y,isFood, number){
+	for(var i = 0;i<snake.snakeX.length-1 || (i<snake.snakeX.length && (isFood || number == 1));i++){
 		if(snake.snakeX[i]==x && snake.snakeY[i]==y){
 			return true;
 		}
 	}
 	
-	for(var i = 0;i<snake1.snakeX.length-1 || (i<snake1.snakeX.length && (isFood || nr == 0));i++){
+	for(var i = 0;i<snake1.snakeX.length-1 || (i<snake1.snakeX.length && (isFood || number == 0));i++){
 		if(snake1.snakeX[i]==x && snake1.snakeY[i]==y){
 			return true;
 		}
@@ -128,16 +129,16 @@ function newFood(){
 	}
 }
 
-function die(nr){
+function die(number){
 	scores = [snake.snakeX.length, snake1.snakeX.length];
-	scores[nr]--;
-	nr = (nr + 1) % 2;
-	scores[nr] = scores[nr] * 2;
+	scores[number]--;
+	number = (number + 1) % 2;
+	scores[number] = scores[number] * 2;
 	console.log(scores);
 	if(scores[0]>scores[1]){
 		alert("Game over. Laimėjo mėlynas.");
 	}else if(scores[0]==scores[1]){
-		scores[(nr + 1)%2]++;
+		scores[(number + 1)%2]++;
 		if(scores[0]>scores[1]){
 			alert("Game over. Laimėjo mėlynas.");
 		} else{
