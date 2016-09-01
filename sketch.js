@@ -1,7 +1,7 @@
 const RECTANGLE = 25;
-const SCREEN_WIDTH=1300;
-const SCREEN_HEIGHT=650;
-const SPEEDFPS = 10;
+const SCREEN_WIDTH=parseInt(prompt("SCREEN_WIDTH"));
+const SCREEN_HEIGHT=parseInt(prompt("SCREEN_HEIGHT"));
+const SPEEDFPS = parseInt(prompt("SPEED"));
 const MARGIN_WIDTH = (SCREEN_WIDTH % RECTANGLE)/2 ;
 const MARGIN_HEIGHT = (SCREEN_HEIGHT % RECTANGLE)/2 ;
 const PLAY_SCREEN_WIDTH = SCREEN_WIDTH - SCREEN_WIDTH % RECTANGLE;
@@ -19,16 +19,21 @@ var speedY;
 var turn = false;
 
 function setup() {
-    createCanvas(SCREEN_WIDTH, SCREEN_HEIGHT);
+    createCanvas(SCREEN_WIDTH, SCREEN_HEIGHT + 20);
 	frameRate(SPEEDFPS);
+	newLayout();
+	newSnake();	
+	//newFood();
+	score();
+}
+
+function newLayout(){
 	background(255,0,0);
 	for(var i = 0;i<SQUARE_H;i++){
 		for(var j = 0;j<SQUARE_V;j++){
 			colorRect(i,j,0);
 		}
 	}
-	newSnake();	
-	newFood();
 }
 
 function newSnake(){
@@ -45,6 +50,7 @@ function newSnake(){
 		speedY=math.randomInt(0,2)*2-1;
 	}
 	colorRect(snakeX[0], snakeY[0], 2);
+	newFood(true);
 }
 
 function draw() {
@@ -69,14 +75,28 @@ function isOnSnake(x,y,isFood){
 	return false;
 }
 
-function newFood(){
-	foodX = math.randomInt(0,SQUARE_H);
-	foodY = math.randomInt(0,SQUARE_V);
+function newFood(isNew){
+	if(isNew){
+		foodX = snakeX[0]+speedX;
+		foodY = snakeY[0]+speedY;
+	}else{
+		foodX = math.randomInt(0,SQUARE_H);
+		foodY = math.randomInt(0,SQUARE_V);
+	}
 	if(isOnSnake(foodX,foodY, true)){
 		newFood();
 	}else{
 		colorRect(foodX, foodY, 1);
 	}
+}
+
+function score(){
+	stroke(255,0,0);
+	fill(255,0,0);
+	rect(10, SCREEN_HEIGHT, 20, 20);
+	fill(0,255,0);
+	text(snakeX.length, 10, SCREEN_HEIGHT + 1, 20, 20 );
+	stroke(0,0,0);
 }
 
 function moveSnake(){
@@ -85,6 +105,7 @@ function moveSnake(){
 	if(snakeX[snakeX.length-1]<SQUARE_H && snakeY[snakeY.length-1] < SQUARE_V && snakeX[snakeX.length-1]>-1 && snakeY[snakeY.length-1] >-1){
 		colorRect(snakeX[snakeX.length-1], snakeY[snakeY.length-1], 2);
 		if((snakeX[snakeX.length-1] == foodX && snakeY[snakeY.length-1] == foodY)){
+			score();
 			newFood();
 			colorRect(snakeX[snakeX.length-1], snakeY[snakeY.length-1], 3);
 		}else if(isOnSnake(snakeX[snakeX.length-1],snakeY[snakeY.length-1], false)){
@@ -100,9 +121,11 @@ function moveSnake(){
 }
 
 function die(){
-	deleteSnake();
+	newLayout();
+	//deleteSnake();
 	newSnake();
-	pause = true;
+	score();
+	//newFood();
 }
 
 function deleteSnake(){
@@ -114,6 +137,7 @@ function deleteSnake(){
 }
 
 function colorRect(x, y, mode) {
+	stroke(255,0,0);
 	if(mode==0)
 		fill(0,0,0);
 	else if(mode==1)
@@ -122,7 +146,7 @@ function colorRect(x, y, mode) {
 		fill(0,0,255);
 	else if(mode==3)
 		fill(0,100,255);
-	rect(MARGIN_WIDTH + (RECTANGLE * x), MARGIN_HEIGHT + (RECTANGLE * y), RECTANGLE - 2, RECTANGLE - 2);
+	rect(MARGIN_WIDTH + (RECTANGLE * x), MARGIN_HEIGHT + (RECTANGLE * y), RECTANGLE, RECTANGLE);
 }
 
 function keyPressed() {
