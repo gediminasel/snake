@@ -132,21 +132,29 @@ function newFood(){
 function die(number){
 	scores = [snake.snakeX.length, snake1.snakeX.length];
 	scores[number]--;
-	number = (number + 1) % 2;
-	scores[number] = scores[number] * 2;
-	console.log(scores);
-	if(scores[0]>scores[1]){
-		alert("Game over. Laimėjo mėlynas.");
-	}else if(scores[0]==scores[1]){
-		scores[(number + 1)%2]++;
+	if(scores[0]>9 || scores[1] > 9){
+		number = (number + 1) % 2;
+		scores[number] = scores[number] * 2;
+		console.log(scores);
 		if(scores[0]>scores[1]){
+			alert("Game over. Laimėjo mėlynas.");
+		}else if(scores[0]==scores[1]){
+			scores[number]++;
+			if(scores[0]>scores[1]){
+				alert("Game over. Laimėjo mėlynas.");
+			} else{
+				alert("Game over. Laimėjo geltonas.");
+			}
+		}
+		else{
+			alert("Game over. Laimėjo geltonas.");
+		}
+	}else{
+		if(number == 1){
 			alert("Game over. Laimėjo mėlynas.");
 		} else{
 			alert("Game over. Laimėjo geltonas.");
 		}
-	}
-	else{
-		alert("Game over. Laimėjo geltonas.");
 	}
 	newLayout();
 	snake.create();
