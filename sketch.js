@@ -17,6 +17,7 @@ var snakes = [];
 var count = 0;
 var nowDied = [];
 var ended = 0;
+var mRemove = false;
 
 function newColor(a,b,c){
 	this.a = a;
@@ -108,14 +109,24 @@ remove : function(){
 function setup() {
 	console.log("setup");
 	while(SPEEDFPS<=0 || isNaN(SPEEDFPS)){
-		SPEEDFPS = parseInt(prompt("SPEED"));
+		SPEEDFPS = prompt("SPEED");
+		if(SPEEDFPS==null){
+			mRemove=true;
+			return;
+		}
+		SPEEDFPS = parseInt(SPEEDFPS);
 	}
 	
     createCanvas(SCREEN_WIDTH, SCREEN_HEIGHT + 20);
 	frameRate(SPEEDFPS);
 	
 	while(count > 6 || count < 2 || isNaN(count)){
-		count = parseInt(prompt("Įveskite žaidėjų kiekį:"));
+		count = prompt("Įveskite žaidėjų kiekį:");
+		if(count==null){
+			mRemove=true;
+			return;
+		}
+		count = parseInt(count);
 	}
 	
 	newLayout();
@@ -128,6 +139,10 @@ function setup() {
 		var x = "";
 		while(x.split('').length!=2){
 			x = prompt("Įveskite " + (i + 1).toString() + " žaidėjo valdymus į kairę ir į dešinę (du simboliai)");
+			if(x==null){
+				mRemove=true;
+				return;
+			}
 		}
 		snakes[i].controls = x.split('');
 	}
@@ -169,6 +184,9 @@ function newLayout(){
 }
 
 function draw() {
+	if(mRemove){
+		remove();
+	}
 	ended++;
 	console.log("draw");
 	nowDied = [];
