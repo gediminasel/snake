@@ -14,6 +14,8 @@ var foodX;
 var foodY;
 
 var snake={
+speedXFirst : 0,
+speedYFirst : 0,
 snakeX : [],
 snakeY : [],
 speedX : 0,
@@ -33,17 +35,25 @@ create : function(){
 		this.speedX = 0;
 		this.speedY=math.randomInt(0,2)*2-1;
 	}
-	colorRect(this.snakeX[0], this.snakeY[0], 2 + this.number);
+	colorRect(this.snakeX[0], this.snakeY[0], 2 + this.number);	
+	colorEllipse(this.snakeX[0] + this.speedX, this.snakeY[0] + this.speedY, this.number);
+	this.speedXFirst=this.speedX;
+	this.speedYFirst=this.speedY;
 },
 score : function(){
 	stroke(255,0,0);
 	fill(255,0,0);
-	rect(10+50*this.number, SCREEN_HEIGHT, 20, 20);
+	rect(10+50*((this.number+1)%2), SCREEN_HEIGHT, 20, 20);
 	fill(255*this.number,255*this.number,255*((this.number+1)%2));
-	text(this.snakeX.length, 10+50*this.number, SCREEN_HEIGHT + 1, 20, 20 );
+	text(this.snakeX.length, 10+50*((this.number+1)%2), SCREEN_HEIGHT + 1, 20, 20 );
 	stroke(0,0,0);
 },
 move : function(){
+	if(this.speedXFirst != 0 || this.speedYFirst != 0){
+		colorRect(this.snakeX[0] + this.speedXFirst, this.snakeY[0] + this.speedYFirst, 0);
+		this.speedYFirst = 0;
+		this.speedXFirst = 0;
+	}
 	colorRect(this.snakeX[0], this.snakeY[0], 0);
 	this.snakeX.push(this.snakeX[this.snakeX.length-1]+this.speedX);
 	this.snakeY.push(this.snakeY[this.snakeY.length-1]+this.speedY);
@@ -105,17 +115,15 @@ function newLayout(){
 	}
 }
 
-
 function draw() {
 	if(pause==false){
 		/*console.log(speedX);
 		console.log(speedY);*/
-		snake.move();
-		snake1.move();
 		snake.turn = false;
 		snake1.turn = false;
-		
-		
+		snake.move();
+		if(snake.speedXFirst==0 && snake.speedYFirst==0)
+			snake1.move();
 	}
 }
 
@@ -157,10 +165,10 @@ function die(number){
 		}
 	}
 	newLayout();
-	snake.create();
-	snake1.create();
 	snake.score();
 	snake1.score();
+	snake.create();
+	snake1.create();
 	newFood(true);
 }
 
@@ -177,6 +185,17 @@ function colorRect(x, y, mode) {
 	else if(mode==4)
 		fill(0,150,255);
 	rect(MARGIN_WIDTH + (RECTANGLE * x), MARGIN_HEIGHT + (RECTANGLE * y), RECTANGLE, RECTANGLE);
+}
+
+function colorEllipse(x, y, mode){
+	console.log(x);
+	console.log(y);
+	stroke(0,0,0);
+	if(mode==0)
+		fill(0,0,255);
+	else
+		fill(255,255,0);
+	ellipse(MARGIN_WIDTH + (RECTANGLE * (x + 0.5)), MARGIN_HEIGHT + (RECTANGLE * (y + 0.5)), RECTANGLE*2/5, RECTANGLE*2/5);
 }
 
 function keyPressed() {
