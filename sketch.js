@@ -1,19 +1,36 @@
-const RECTANGLE = 25;
+const RECTANGLE = 30;
 const SCREEN_WIDTH=/*parseInt(prompt("SCREEN_WIDTH"));500*/$(window).width();
 const SCREEN_HEIGHT=/*parseInt(prompt("SCREEN_HEIGHT"));500*/$(window).height()-20;
-const SPEEDFPS = parseInt(prompt("SPEED"));;
 const MARGIN_WIDTH = (SCREEN_WIDTH % RECTANGLE)/2 ;
 const MARGIN_HEIGHT = (SCREEN_HEIGHT % RECTANGLE)/2 ;
 const PLAY_SCREEN_WIDTH = SCREEN_WIDTH - SCREEN_WIDTH % RECTANGLE;
 const PLAY_SCREEN_HEIGHT = SCREEN_HEIGHT - SCREEN_HEIGHT % RECTANGLE;
 const SQUARE_H = parseInt( SCREEN_WIDTH / RECTANGLE );
 const SQUARE_V = parseInt( SCREEN_HEIGHT / RECTANGLE );
+var SPEEDFPS = 0;
+var ADD_AFTER = 50;
 
 var pause;
 var foodX;
 var foodY;
+var snakes = [];
+var count = 0;
+var nowDied = [];
+var ended = 0;
+
+function newColor(a,b,c){
+	this.a = a;
+	this.b = b;
+	this.c = c;
+}
+
+var colors = [new newColor(0,0,255),new newColor(0,255,0),new newColor(255,0,0),new newColor(0,255,255),new newColor(255,0,255),new newColor(255,255,0)];
+var backgroundColor = new newColor(0,0,0);
+var strokeColor = new newColor(255,255,255);
+var foodColor = new newColor(155,155,155);
 
 var snake={
+controls : [],
 speedXFirst : 0,
 speedYFirst : 0,
 snakeX : [],
@@ -21,13 +38,14 @@ snakeY : [],
 speedX : 0,
 speedY : 0,
 turn : false,
-number : 0,
+died : false,
 create : function(){
-	pause = true;
+	console.log("create");
+	this.died = false;
 	this.snakeX = [];
 	this.snakeY = [];
-	this.snakeX.push(math.randomInt(1,SQUARE_H-1));
-	this.snakeY.push(math.randomInt(1,SQUARE_V-1));
+	this.snakeX.push(math.randomInt(2,SQUARE_H-2));
+	this.snakeY.push(math.randomInt(2,SQUARE_V-2));
 	if(math.randomInt(0,2)==0){
 		this.speedX = math.randomInt(0,2)*2-1;
 		this.speedY = 0;
@@ -41,14 +59,16 @@ create : function(){
 	this.speedYFirst=this.speedY;
 },
 score : function(){
-	stroke(255,0,0);
-	fill(255,0,0);
-	rect(10+50*((this.number+1)%2), SCREEN_HEIGHT, 20, 20);
-	fill(255*this.number,255*this.number,255*((this.number+1)%2));
-	text(this.snakeX.length, 10+50*((this.number+1)%2), SCREEN_HEIGHT + 1, 20, 20 );
-	stroke(0,0,0);
+	console.log("score");
+	stroke(backgroundColor.a,backgroundColor.b,backgroundColor.c);
+	fill(backgroundColor.a,backgroundColor.b,backgroundColor.c);
+	rect(10+50*this.number, SCREEN_HEIGHT, 20, 20);
+	fill(parseInt(colors[this.number].a),parseInt(colors[this.number].b),parseInt(colors[this.number].c));
+	text(this.snakeX.length, 10+50*this.number, SCREEN_HEIGHT + 1, 20, 20 );
+	stroke(strokeColor.a,strokeColor.b,strokeColor.c);
 },
 move : function(){
+	console.log("move");
 	if(this.speedXFirst != 0 || this.speedYFirst != 0){
 		colorRect(this.snakeX[0] + this.speedXFirst, this.snakeY[0] + this.speedYFirst, 0);
 		this.speedYFirst = 0;
@@ -57,15 +77,16 @@ move : function(){
 	colorRect(this.snakeX[0], this.snakeY[0], 0);
 	this.snakeX.push(this.snakeX[this.snakeX.length-1]+this.speedX);
 	this.snakeY.push(this.snakeY[this.snakeY.length-1]+this.speedY);
-	if(this.snakeX[this.snakeX.length-1]<SQUARE_H &&
+	if(this.snakeX[this.snakeX.length-1] < SQUARE_H &&
 			this.snakeY[this.snakeY.length-1] < SQUARE_V &&
-			this.snakeX[this.snakeX.length-1]>-1 &&
-			this.snakeY[this.snakeY.length-1] >-1){
+			this.snakeX[this.snakeX.length-1] > -1 &&
+			this.snakeY[this.snakeY.length-1] > -1){
 		colorRect(this.snakeX[this.snakeX.length-1], this.snakeY[this.snakeY.length-1], 2 + this.number);
-		if((this.snakeX[this.snakeX.length-1] == foodX && this.snakeY[this.snakeY.length-1] == foodY)){
+		if((this.snakeX[this.snakeX.length-1] == foodX && this.snakeY[this.snakeY.length-1] == foodY) || ended == ADD_AFTER){
 			this.score();
-			newFood();
-			colorRect(this.snakeX[this.snakeX.length-1], this.snakeY[this.snakeY.length-1], 4);
+			if((this.snakeX[this.snakeX.length-1] == foodX && this.snakeY[this.snakeY.length-1] == foodY))
+				newFood();
+			colorRect(this.snakeX[this.snakeX.length-1], this.snakeY[this.snakeY.length-1], this.number+2, true);
 		}else if(isOnSnake(this.snakeX[this.snakeX.length-1],this.snakeY[this.snakeY.length-1], false, this.number)){
 			die(this.number);
 		}else{
@@ -75,39 +96,71 @@ move : function(){
 	}else{
 		die(this.number);
 	}
+},
+remove : function(){
+	console.log("remove");
+	for(var i = 0;i<this.snakeX.length;i++){
+		colorRect(this.snakeX[i], this.snakeY[i], 0);
+	}
 }
 };
-var snake1= jQuery.extend({}, snake);
-snake1.number = 1;
 
 function setup() {
+	console.log("setup");
+	while(SPEEDFPS<=0 || isNaN(SPEEDFPS)){
+		SPEEDFPS = parseInt(prompt("SPEED"));
+	}
+	
     createCanvas(SCREEN_WIDTH, SCREEN_HEIGHT + 20);
 	frameRate(SPEEDFPS);
+	
+	while(count > 6 || count < 2 || isNaN(count)){
+		count = parseInt(prompt("Įveskite žaidėjų kiekį:"));
+	}
+	
 	newLayout();
-	snake.create();
-	snake1.create();
-	snake.score();
-	snake1.score();
+	
+	for(var i = 0;i<count;i++){
+		snakes.push(jQuery.extend({number : i}, snake));
+	}
+	
+	for(var i = 0;i<count;i++){
+		var x = "";
+		while(x.split('').length!=2){
+			x = prompt("Įveskite " + (i + 1).toString() + " žaidėjo valdymus į kairę ir į dešinę (du simboliai)");
+		}
+		snakes[i].controls = x.split('');
+	}
+	
+	for(var i = 0;i<count;i++){
+		snakes[i].create();
+	}
+	for(var i = 0;i<count;i++){
+		snakes[i].score();
+	}
 	newFood(true);
+	ADD_AFTER = 3 * SPEEDFPS;
 }
 
 function isOnSnake(x,y,isFood, number){
-	for(var i = 0;i<snake.snakeX.length-1 || (i<snake.snakeX.length && (isFood || number == 1));i++){
-		if(snake.snakeX[i]==x && snake.snakeY[i]==y){
-			return true;
+	console.log("isOnSnake");
+	for(var j = 0;j<count;j++){
+		if(snakes[j].died && -1==nowDied.indexOf(j)){
+			continue;
+		}
+		for(var i = 0;i<snakes[j].snakeX.length-1 || (i<snakes[j].snakeX.length && (isFood || number != j));i++){
+			if(snakes[j].snakeX[i]==x && snakes[j].snakeY[i]==y){
+				return true;
+			}
 		}
 	}
 	
-	for(var i = 0;i<snake1.snakeX.length-1 || (i<snake1.snakeX.length && (isFood || number == 0));i++){
-		if(snake1.snakeX[i]==x && snake1.snakeY[i]==y){
-			return true;
-		}
-	}
 	return false;
 }
 
 function newLayout(){
-	background(255,0,0);
+	console.log("newLayout");
+	background(backgroundColor.a,backgroundColor.b,backgroundColor.c);
 	for(var i = 0;i<SQUARE_H;i++){
 		for(var j = 0;j<SQUARE_V;j++){
 			colorRect(i,j,0);
@@ -116,18 +169,29 @@ function newLayout(){
 }
 
 function draw() {
+	ended++;
+	console.log("draw");
+	nowDied = [];
 	if(pause==false){
-		/*console.log(speedX);
-		console.log(speedY);*/
-		snake.turn = false;
-		snake1.turn = false;
-		snake.move();
-		if(snake.speedXFirst==0 && snake.speedYFirst==0)
-			snake1.move();
+		for(var i = 0;i<count;i++){
+			snakes[i].turn=false;
+		}
+		for(var i = 0;i<count;i++){
+			if(!pause){
+				if(!snakes[i].died)
+					snakes[i].move();
+			}
+			else
+				return;
+		}
+	}
+	if(ended>=ADD_AFTER){
+		ended=0;
 	}
 }
 
 function newFood(){
+	console.log("newFood");
 	foodX = math.randomInt(0,SQUARE_H);
 	foodY = math.randomInt(0,SQUARE_V);
 	if(isOnSnake(foodX,foodY, true)){
@@ -138,65 +202,64 @@ function newFood(){
 }
 
 function die(number){
-	scores = [snake.snakeX.length, snake1.snakeX.length];
-	scores[number]--;
-	if(scores[0]>9 || scores[1] > 9){
-		number = (number + 1) % 2;
-		scores[number] = scores[number] * 2;
-		console.log(scores);
-		if(scores[0]>scores[1]){
-			alert("Game over. Laimėjo mėlynas.");
-		}else if(scores[0]==scores[1]){
-			scores[number]++;
-			if(scores[0]>scores[1]){
-				alert("Game over. Laimėjo mėlynas.");
-			} else{
-				alert("Game over. Laimėjo geltonas.");
-			}
-		}
-		else{
-			alert("Game over. Laimėjo geltonas.");
-		}
-	}else{
-		if(number == 1){
-			alert("Game over. Laimėjo mėlynas.");
-		} else{
-			alert("Game over. Laimėjo geltonas.");
+	console.log("die");
+	nowDied.push(number);
+	snakes[number].remove();
+	snakes[number].died = true;
+	
+	var countAlive = 0;
+	var lastInd = -1;
+	for(var i = 0;i<count;i++){
+		if(!snakes[i].died){
+			countAlive++;
+			lastInd=i;
 		}
 	}
-	newLayout();
-	snake.score();
-	snake1.score();
-	snake.create();
-	snake1.create();
-	newFood(true);
+	if(countAlive<=1){
+		pause = true;
+		/*var maxInd = 0;
+		for(var i = 1;i<count;i++){
+			if(snakes[maxInd].snakeX.length<snakes[i].snakeX.length){
+				maxInd=i;
+			}
+		}*/
+		alert("Laimėjo "+(lastInd + 1).toString()+" žaidėjas.");
+		newLayout();
+		for(var i = 0;i<count;i++){
+			snakes[i].create();
+		}
+		for(var i = 0;i<count;i++){
+			snakes[i].score();
+		}
+		newFood(true);
+		nowDied = [];
+	}
 }
 
-function colorRect(x, y, mode) {
-	stroke(255,0,0);
-	if(mode==0)
-		fill(0,0,0);
-	else if(mode==1)
-		fill(0,255,0);
-	else if(mode==2)
-		fill(0,0,255);
-	else if(mode==3)
-		fill(255,255,0);
-	else if(mode==4)
-		fill(0,150,255);
-	rect(MARGIN_WIDTH + (RECTANGLE * x), MARGIN_HEIGHT + (RECTANGLE * y), RECTANGLE, RECTANGLE);
+function colorRect(x, y, mode, isOnFood = false) {
+	if(x>=0 && y>=0 && x < SQUARE_H && y < SQUARE_V){
+		stroke(strokeColor.a,strokeColor.b,strokeColor.c);
+		if(mode==0)
+			fill(backgroundColor.a,backgroundColor.b,backgroundColor.c);
+		else if(mode==1)
+			fill(foodColor.a,foodColor.b,foodColor.c);
+		else {
+			if(isOnFood){
+				fill(parseInt(colors[mode-2].a/2),parseInt(colors[mode-2].b/2),parseInt(colors[mode-2].c/2));
+			}else{
+				fill(parseInt(colors[mode-2].a),parseInt(colors[mode-2].b),parseInt(colors[mode-2].c));
+			}
+		}
+		rect(MARGIN_WIDTH + (RECTANGLE * x), MARGIN_HEIGHT + (RECTANGLE * y), RECTANGLE, RECTANGLE);
+	}
 }
 
 function colorEllipse(x, y, mode){
-	console.log(x);
-	console.log(y);
-	stroke(0,0,0);
-	if(mode==0)
-		fill(0,0,255);
-	else
-		fill(255,255,0);
+	console.log("colorEllipse");
+	stroke(strokeColor.a,strokeColor.b,strokeColor.c);
+	fill(parseInt(colors[mode].a),parseInt(colors[mode].b),parseInt(colors[mode].c));
 	ellipse(MARGIN_WIDTH + (RECTANGLE * (x + 0.5)), MARGIN_HEIGHT + (RECTANGLE * (y + 0.5)), RECTANGLE*2/5, RECTANGLE*2/5);
-}
+}/*
 
 function keyPressed() {
 	var cSnake=snake;
@@ -218,10 +281,10 @@ function keyPressed() {
 			cSnake.turn = false;
 		}
 	}
-}
+}*/
 
 function keyTyped(){
-	var cSnake=snake1;
+	/*var cSnake=snake1;
 	if(!cSnake.turn && !pause){
 		cSnake.turn = true;
 		if (key == "a" && cSnake.speedX != 1) {
@@ -239,8 +302,33 @@ function keyTyped(){
 		}else{
 			cSnake.turn = false;
 		}
-	}
+	}*/
 	if(key == ' '){
 		pause = !pause;
+	}
+	if(!pause){
+		for(var i = 0;i<count;i++){
+			if(!snakes[i].turn){
+				if (key == snakes[i].controls[0]) {
+					if (snakes[i].speedX != 0) {
+						snakes[i].speedY = -1*snakes[i].speedX;
+						snakes[i].speedX = 0;
+					} else {
+						snakes[i].speedX = snakes[i].speedY;
+						snakes[i].speedY = 0;
+					}
+					snakes[i].turn=true;
+				} else if (key == snakes[i].controls[1]) {
+					if (snakes[i].speedX != 0) {
+						snakes[i].speedY = snakes[i].speedX;
+						snakes[i].speedX = 0;
+					} else {
+						snakes[i].speedX = -1*snakes[i].speedY;
+						snakes[i].speedY = 0;
+					}
+					snakes[i].turn=true;
+				}
+			}
+		}
 	}
 }
