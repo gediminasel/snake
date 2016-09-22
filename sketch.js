@@ -29,6 +29,7 @@ var colors = [new newColor(0,0,255),new newColor(0,255,0),new newColor(255,0,0),
 var backgroundColor = new newColor(0,0,0);
 var strokeColor = new newColor(255,255,255);
 var foodColor = new newColor(155,155,155);
+var lastAlive;
 
 var snake={
 controls : [],
@@ -189,18 +190,60 @@ function draw() {
 	}
 	ended++;
 	console.log("draw");
-	nowDied = [];
 	if(pause==false){
 		for(var i = 0;i<count;i++){
 			snakes[i].turn=false;
-		}
-		for(var i = 0;i<count;i++){
+			if(nowDied.indexOf(i)!=-1)
+				array.splice(index, i);
 			if(!pause){
 				if(!snakes[i].died)
 					snakes[i].move();
 			}
 			else
 				return;
+		}	
+		var countAlive = 0;
+		var lastInd = -1;
+		for(var i = 0;i<count;i++){
+			if(!snakes[i].died){
+				countAlive++;
+				lastInd=i;
+			}
+		}
+		if(countAlive<=1){
+			pause = true;
+			var winners = "Laimėjo ";
+			if(countAlive == 1){
+				winners = winners + (lastInd + 1).toString() + " žaidėjas.";
+			}else{
+				for(var i = 0;i<lastAlive.length;i++){
+					winners = winners + (lastAlive[i] + 1).toString() + " ";
+				}
+				winners = winners + "žaidėjai."
+			}
+			/*var maxInd = 0;
+			for(var i = 1;i<count;i++){
+				if(snakes[maxInd].snakeX.length<snakes[i].snakeX.length){
+					maxInd=i;
+				}
+			}*/
+			alert(winners);
+			newLayout();
+			for(var i = 0;i<count;i++){
+				snakes[i].create();
+			}
+			for(var i = 0;i<count;i++){
+				snakes[i].score();
+			}
+			newFood(true);
+			nowDied = [];
+		}else{
+			lastAlive = [];
+			for(var i = 0;i<count;i++){
+				if(!snakes[i].died){
+					lastAlive.push(i);
+				}
+			}
 		}
 	}
 	if(ended>=ADD_AFTER){
@@ -225,33 +268,7 @@ function die(number){
 	snakes[number].remove();
 	snakes[number].died = true;
 	
-	var countAlive = 0;
-	var lastInd = -1;
-	for(var i = 0;i<count;i++){
-		if(!snakes[i].died){
-			countAlive++;
-			lastInd=i;
-		}
-	}
-	if(countAlive<=1){
-		pause = true;
-		/*var maxInd = 0;
-		for(var i = 1;i<count;i++){
-			if(snakes[maxInd].snakeX.length<snakes[i].snakeX.length){
-				maxInd=i;
-			}
-		}*/
-		alert("Laimėjo "+(lastInd + 1).toString()+" žaidėjas.");
-		newLayout();
-		for(var i = 0;i<count;i++){
-			snakes[i].create();
-		}
-		for(var i = 0;i<count;i++){
-			snakes[i].score();
-		}
-		newFood(true);
-		nowDied = [];
-	}
+
 }
 
 function colorRect(x, y, mode, isOnFood = false) {
