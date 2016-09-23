@@ -193,8 +193,9 @@ function draw() {
 	if(pause==false){
 		for(var i = 0;i<count;i++){
 			snakes[i].turn=false;
-			if(nowDied.indexOf(i)!=-1)
-				array.splice(index, i);
+			var index = nowDied.indexOf(i);
+			if(index!=-1)
+				nowDied.splice(index, i);
 			if(!pause){
 				if(!snakes[i].died)
 					snakes[i].move();
