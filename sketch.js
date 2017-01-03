@@ -18,17 +18,8 @@ var count = 0;
 var nowDied = [];
 var ended = 0;
 var mRemove = false;
-
-function newColor(a,b,c){
-	this.a = a;
-	this.b = b;
-	this.c = c;
-}
-
-var colors = [new newColor(0,0,255),new newColor(0,255,0),new newColor(255,0,0),new newColor(0,255,255),new newColor(255,0,255),new newColor(255,255,0)];
-var backgroundColor = new newColor(0,0,0);
-var strokeColor = new newColor(255,255,255);
-var foodColor = new newColor(155,155,155);
+var backgroundColor, strokeColor, foodColor;
+var colors;
 var lastAlive;
 
 var snake={
@@ -62,12 +53,12 @@ create : function(){
 },
 score : function(){
 	console.log("score");
-	stroke(backgroundColor.a,backgroundColor.b,backgroundColor.c);
-	fill(backgroundColor.a,backgroundColor.b,backgroundColor.c);
+	stroke(backgroundColor);
+	fill(backgroundColor);
 	rect(10+50*this.number, SCREEN_HEIGHT, 20, 20);
-	fill(parseInt(colors[this.number].a),parseInt(colors[this.number].b),parseInt(colors[this.number].c));
+	fill(colors[this.number]);
 	text(this.snakeX.length, 10+50*this.number, SCREEN_HEIGHT + 1, 20, 20 );
-	stroke(strokeColor.a,strokeColor.b,strokeColor.c);
+	stroke(strokeColor);
 },
 move : function(){
 	console.log("move");
@@ -109,6 +100,10 @@ remove : function(){
 
 function setup() {
 	console.log("setup");
+	backgroundColor = color(0,0,0);
+	strokeColor = color(255,255,255);
+	foodColor = color(155,155,155);
+	colors = [color(0,0,255),color(0,255,0),color(255,0,0),color(0,255,255),color(255,0,255),color(255,255,0)];
 	while(SPEEDFPS<=0 || isNaN(SPEEDFPS)){
 		SPEEDFPS = prompt("SPEED");
 		if(SPEEDFPS==null){
@@ -176,7 +171,7 @@ function isOnSnake(x,y,isFood, number){
 
 function newLayout(){
 	console.log("newLayout");
-	background(backgroundColor.a,backgroundColor.b,backgroundColor.c);
+	background(backgroundColor);
 	for(var i = 0;i<SQUARE_H;i++){
 		for(var j = 0;j<SQUARE_V;j++){
 			colorRect(i,j,0);
@@ -274,16 +269,16 @@ function die(number){
 
 function colorRect(x, y, mode, isOnFood = false) {
 	if(x>=0 && y>=0 && x < SQUARE_H && y < SQUARE_V){
-		stroke(strokeColor.a,strokeColor.b,strokeColor.c);
+		stroke(strokeColor);
 		if(mode==0)
-			fill(backgroundColor.a,backgroundColor.b,backgroundColor.c);
+			fill(backgroundColor);
 		else if(mode==1)
-			fill(foodColor.a,foodColor.b,foodColor.c);
+			fill(foodColor);
 		else {
 			if(isOnFood){
-				fill(parseInt(colors[mode-2].a/2),parseInt(colors[mode-2].b/2),parseInt(colors[mode-2].c/2));
+				fill(parseInt(red(colors[mode-2])/2),parseInt(green(colors[mode-2])/2),parseInt(blue(colors[mode-2])/2));
 			}else{
-				fill(parseInt(colors[mode-2].a),parseInt(colors[mode-2].b),parseInt(colors[mode-2].c));
+				fill(colors[mode-2]);
 			}
 		}
 		rect(MARGIN_WIDTH + (RECTANGLE * x), MARGIN_HEIGHT + (RECTANGLE * y), RECTANGLE, RECTANGLE);
@@ -292,8 +287,8 @@ function colorRect(x, y, mode, isOnFood = false) {
 
 function colorEllipse(x, y, mode){
 	console.log("colorEllipse");
-	stroke(strokeColor.a,strokeColor.b,strokeColor.c);
-	fill(parseInt(colors[mode].a),parseInt(colors[mode].b),parseInt(colors[mode].c));
+	stroke(strokeColor);
+	fill(colors[mode]);
 	ellipse(MARGIN_WIDTH + (RECTANGLE * (x + 0.5)), MARGIN_HEIGHT + (RECTANGLE * (y + 0.5)), RECTANGLE*2/5, RECTANGLE*2/5);
 }/*
 
