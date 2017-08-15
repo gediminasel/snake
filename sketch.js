@@ -217,12 +217,6 @@ function draw() {
 				}
 				winners = winners + "žaidėjai."
 			}
-			/*var maxInd = 0;
-			for(var i = 1;i<count;i++){
-				if(snakes[maxInd].snakeX.length<snakes[i].snakeX.length){
-					maxInd=i;
-				}
-			}*/
 			alert(winners);
 			newLayout();
 			for(var i = 0;i<count;i++){
@@ -290,50 +284,9 @@ function colorEllipse(x, y, mode){
 	stroke(strokeColor);
 	fill(colors[mode]);
 	ellipse(MARGIN_WIDTH + (RECTANGLE * (x + 0.5)), MARGIN_HEIGHT + (RECTANGLE * (y + 0.5)), RECTANGLE*2/5, RECTANGLE*2/5);
-}/*
-
-function keyPressed() {
-	var cSnake=snake;
-	if(!cSnake.turn && !pause){
-		cSnake.turn = true;
-		if (keyCode === LEFT_ARROW && cSnake.speedX != 1) {
-			cSnake.speedX = -1;
-			cSnake.speedY = 0;
-		} else if (keyCode === RIGHT_ARROW && cSnake.speedX != -1) {
-			cSnake.speedX = 1;
-			cSnake.speedY = 0;
-		} else if (keyCode === UP_ARROW && cSnake.speedY != 1) {
-			cSnake.speedX = 0;
-			cSnake.speedY = -1;
-		} else if (keyCode === DOWN_ARROW && cSnake.speedY != -1) {
-			cSnake.speedX = 0;
-			cSnake.speedY = 1;
-		}else{
-			cSnake.turn = false;
-		}
-	}
-}*/
+}
 
 function keyTyped(){
-	/*var cSnake=snake1;
-	if(!cSnake.turn && !pause){
-		cSnake.turn = true;
-		if (key == "a" && cSnake.speedX != 1) {
-			cSnake.speedX = -1;
-			cSnake.speedY = 0;
-		} else if (key == "d" && cSnake.speedX != -1) {
-			cSnake.speedX = 1;
-			cSnake.speedY = 0;
-		} else if (key == "w" && cSnake.speedY != 1) {
-			cSnake.speedX = 0;
-			cSnake.speedY = -1;
-		} else if (key == "s" && cSnake.speedY != -1) {
-			cSnake.speedX = 0;
-			cSnake.speedY = 1;
-		}else{
-			cSnake.turn = false;
-		}
-	}*/
 	if(key == ' '){
 		pause = !pause;
 	}
